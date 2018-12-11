@@ -8,6 +8,13 @@ and returns the corrected data to --out file. Use --forceCutoff if summStats are
 To compare against a duplicate set of summary stats (ie. held out data for validation),
 supply either file name with --otherIn, or if this was done previously, supply the 
 --merged file to skip the lengthy snp alignment step. More diagnostic plotting will be returned here.
+
+Example runs:
+	To correct:
+	python betaWinnersCurseCorrection.py --in <my_summary_stats.file> --out <output prefix>
+	To compare to another file:
+	python betaWinnersCurseCorrection.py --in <my_summary_stats.file> --out <output prefix> \
+		--otherIn <my_replicate_summary_stats.file>
 '''
 #################
 ## open questions: is SE = sigma? Assumed YES
@@ -29,12 +36,12 @@ print("loaded packages")
 
 # sys.argv = "pythonScriptName --in z040_in_bgen_SHR_all_halfGwas1_justSig.gwasOutput --otherIn \
 # z030_out_bgen_SHR_all_halfGwas2.tab --out WCplots/z041_out_bgen_SHR_all_halfGwas_WCcorrected_justSig --forceCutoff \
-# -vvv --merged z041_out_bgen_SHR_all_halfGwas_WCcorrected_justSig_withReplicate.txt --otherColNames .,chr,pos,.,A0,A1,.,.,.,.,beta,.,.,.,.,p-value".split(" ")
+# --merged z041_out_bgen_SHR_all_halfGwas_WCcorrected_justSig_withReplicate.txt --otherColNames .,chr,pos,.,A0,A1,.,.,.,.,beta,.,.,.,.,p-value".split(" ")
 
 
 # sys.argv = "pythonScriptName --in z040_in_bgen_SHR_all_halfGwas1_justSigish.gwasOutput --otherIn \
 # z030_out_bgen_SHR_all_halfGwas2.tab --out WCplots/z041_out_bgen_SHR_all_halfGwas_WCcorrected_justSigish --forceCutoff \
-# -vvv --merged z041_out_bgen_SHR_all_halfGwas_WCcorrected_justSigish_withReplicate.txt --pvalCutoff 5e-4 --otherColNames .,chr,pos,.,A0,A1,.,.,.,.,beta,.,.,.,.,p-value".split(" ")
+# --merged z041_out_bgen_SHR_all_halfGwas_WCcorrected_justSigish_withReplicate.txt --pvalCutoff 5e-4 --otherColNames .,chr,pos,.,A0,A1,.,.,.,.,beta,.,.,.,.,p-value".split(" ")
 # print("TESTING ARGUMENTS USED ###################################################################################################")
 
 
@@ -64,7 +71,6 @@ parser.add_argument('--otherColNames', dest='otherColNamesRaw', action='store', 
                     help='Comma delimited column names. Required columns: "beta,p-value", and either "MarkerName" or "chr,pos,A0,A1" (default: Same as --colNames).')
 parser.add_argument('--skipHeader', dest='skipHeader', action='store_true',
                     help='Skim summStats header (default: False).')
-parser.add_argument('--verbose', '-v', action='count', default=0)
 parser.add_argument('--quiet', '-q', action='count', default=0)
 args = parser.parse_args()
 if args.quiet == 0:
@@ -203,9 +209,9 @@ uncorrectedStats["delta_original_Mean"] = uncorrectedStats.apply(lambda row: mag
 uncorrectedStats["delta_original_MSE"] = uncorrectedStats.apply(lambda row: magCalc(row,"beta","beta_MSE"),axis=1)
 uncorrectedStats["delta_original_MLE"] = uncorrectedStats.apply(lambda row: magCalc(row,"beta","beta_MLE"),axis=1)
 
-#uncorrectedStats.to_csv("%s_withCorrections.txt" % args.outPrefix,index=False,sep="\t")
+uncorrectedStats.to_csv("%s_withCorrections.txt" % args.outPrefix,index=False,sep="\t")
 
-if args.verbose > 0:
+if args.quiet == 0:
 	print("Plotting.")
 	boxesToDo = ["Mean","MLE","MSE"]
 
